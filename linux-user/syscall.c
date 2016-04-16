@@ -5847,6 +5847,8 @@ static target_timer_t get_timer_id(abi_long arg)
     return timerid;
 }
 
+extern int inscount;
+
 /* do_syscall() should always have a single exit point at the end so
    that actions, such as logging of syscall results, can be performed.
    All errnos that do_syscall() returns must be -TARGET_<errcode>. */
@@ -5869,6 +5871,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 
     switch(num) {
     case TARGET_NR_exit:
+        fprintf(stderr, "%d\n", inscount);
         /* In old applications this may be used to implement _exit(2).
            However in threaded applictions it is used for thread termination,
            and _exit_group is used for application termination.
@@ -7828,6 +7831,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 #ifdef __NR_exit_group
         /* new thread calls */
     case TARGET_NR_exit_group:
+        fprintf(stderr, "%d\n", inscount);
 #ifdef TARGET_GPROF
         _mcleanup();
 #endif

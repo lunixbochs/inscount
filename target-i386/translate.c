@@ -4327,6 +4327,11 @@ static void gen_sse(CPUX86State *env, DisasContext *s, int b,
     }
 }
 
+int inscount = 0;
+void helper_tracecode(void) {
+    inscount += 1;
+}
+
 /* convert one instruction. s->is_jmp is set if the translation must
    be stopped. Return the next pc value */
 static target_ulong disas_insn(CPUX86State *env, DisasContext *s,
@@ -4338,6 +4343,8 @@ static target_ulong disas_insn(CPUX86State *env, DisasContext *s,
     int modrm, reg, rm, mod, op, opreg, val;
     target_ulong next_eip, tval;
     int rex_w, rex_r;
+
+    gen_helper_tracecode();
 
     s->pc_start = s->pc = pc_start;
     prefixes = 0;

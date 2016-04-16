@@ -349,6 +349,7 @@ static int fatal_signal (int sig)
 }
 
 /* returns 1 if given signal should dump core if not handled */
+/*
 static int core_dump_signal(int sig)
 {
     switch (sig) {
@@ -364,6 +365,7 @@ static int core_dump_signal(int sig)
         return (0);
     }
 }
+*/
 
 void signal_init(void)
 {
@@ -430,19 +432,21 @@ static inline void free_sigqueue(CPUArchState *env, struct sigqueue *q)
     ts->first_free = q;
 }
 
+extern int inscount;
+
 /* abort execution with signal */
 static void QEMU_NORETURN force_sig(int target_sig)
 {
     CPUState *cpu = thread_cpu;
     CPUArchState *env = cpu->env_ptr;
-    TaskState *ts = (TaskState *)cpu->opaque;
-    int host_sig, core_dumped = 0;
+    int host_sig;
     struct sigaction act;
 
     host_sig = target_to_host_signal(target_sig);
     trace_user_force_sig(env, target_sig, host_sig);
     gdb_signalled(env, target_sig);
 
+#if 0
     /* dump core if supported by target binary format */
     if (core_dump_signal(target_sig) && (ts->bprm->core_dump != NULL)) {
         stop_all_tasks();
@@ -450,15 +454,19 @@ static void QEMU_NORETURN force_sig(int target_sig)
             ((*ts->bprm->core_dump)(target_sig, env) == 0);
     }
     if (core_dumped) {
+#endif
         /* we already dumped the core of target process, we don't want
          * a coredump of qemu itself */
         struct rlimit nodump;
         getrlimit(RLIMIT_CORE, &nodump);
         nodump.rlim_cur=0;
         setrlimit(RLIMIT_CORE, &nodump);
+#if 0
         (void) fprintf(stderr, "qemu: uncaught target signal %d (%s) - %s\n",
             target_sig, strsignal(host_sig), "core dumped" );
     }
+#endif
+    fprintf(stderr, "%d\n", inscount);
 
     /* The proper exit code for dying from an uncaught signal is
      * -<signal>.  The kernel doesn't allow exit() or _exit() to pass
